@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="wrapper">
+        <div id="container">
+            <div id="welcome">
+                <h1><span>Ошибка!!! </span></h1>
+            </div>
+
+            <div id="status">
+                Время жизни сессии для оплаты истекло.
+                <form action="/payment" id="status"></form>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
