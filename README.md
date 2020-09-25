@@ -1,77 +1,70 @@
-Symfony Standard Edition
-========================
+Тестовое задание для backend-стажёра в юнит Billing
 
-**WARNING**: This distribution does not support Symfony 4. See the
-[Installing & Setting up the Symfony Framework][15] page to find a replacement
-that fits you best.
+Давай напишем собственную платёжную систему, которая будет уметь отображать форму оплаты банковской картой и сохранять информацию о выполненных платежах.
 
-Welcome to the Symfony Standard Edition - a fully-functional Symfony
-application that you can use as the skeleton for your new applications.
+    1) Пусть это будет сервис с JSON API. - принимает и отдает данные в JSON
 
-For details on how to download and get started with Symfony, see the
-[Installation][1] chapter of the Symfony Documentation.
+    2) Маршруты
 
-What's inside?
---------------
+    Запрос на регистрацию - сделано (V).
+    (У него должен быть метод /register, принимающий сумму и назначение платежа и возвращающий URL страницы с идентификатором платёжной сессии,
+         например, http://somehost/payments/card/form?sessionId=4e273d86-864c-429d-879a-34579708dd69.)
+    defaults: { _controller: RegisterController:register }
+    path: /register
+    methods: POST
+    inputData:
+        {
+            "summa" : int,
+            "назначение платежа" : string
+            "уведомление" : string
+        }
+    returnData:
+        {
+            "url" : string
+        }
 
-The Symfony Standard Edition is configured with the following defaults:
+    Вывод формы для платежа - сделано (V).
+    (По URL должна открываться форма оплаты с суммой и назначением платежа.)
+    defaults: { _controller: PaymentController:paymentForm }
+    path: /payments/card/form?sessionId=4e273d86-864c-429d-879a-34579708dd69
+    methods: GET
+    inputData:
+        {
+            параметры запроса
+        }
+    returnData:
+        {
+            форма для заполнения реквизитов
+        }
 
-  * An AppBundle you can use to start coding;
+    Отправка информации о платежных данных - (V)
+    (При отправке формы номер карты должен проверяться по алгоритму Луна. Валидные номера должны имитировать успешную оплату, невалидные — возвращать ошибку.)
+    defaults: { _controller: PaymentController:paymentSend }
+    path: /payments/send
+    methods: POST
+    inputData:
+        {
+            "summa" : int,
+            "назначение платежа" : string,
+            "cardNumber" : string,
+            "monthExpire" : string,
+            "yearExpire" : string,
+            "cardHolder" : string,
+            "CVV" : int
+        }
+    returnData:
+        {
+            "cardNumber" : string,
+            "paymentIsValid" : true/false
+        }
 
-  * Twig as the only configured template engine;
 
-  * Doctrine ORM/DBAL;
+Мы ждём от тебя ссылку на github с реализацией на PHP (можно использовать любой фреймворк).
+Что можно сделать дополнительно:
 
-  * Swiftmailer;
-
-  * Annotations enabled for everything.
-
-It comes pre-configured with the following bundles:
-
-  * **FrameworkBundle** - The core Symfony framework bundle
-
-  * [**SensioFrameworkExtraBundle**][6] - Adds several enhancements, including
-    template and routing annotation capability
-
-  * [**DoctrineBundle**][7] - Adds support for the Doctrine ORM
-
-  * [**TwigBundle**][8] - Adds support for the Twig templating engine
-
-  * [**SecurityBundle**][9] - Adds security by integrating Symfony's security
-    component
-
-  * [**SwiftmailerBundle**][10] - Adds support for Swiftmailer, a library for
-    sending emails
-
-  * [**MonologBundle**][11] - Adds support for Monolog, a logging library
-
-  * **WebProfilerBundle** (in dev/test env) - Adds profiling functionality and
-    the web debug toolbar
-
-  * **SensioDistributionBundle** (in dev/test env) - Adds functionality for
-    configuring and working with Symfony distributions
-
-  * [**SensioGeneratorBundle**][13] (in dev env) - Adds code generation
-    capabilities
-
-  * [**WebServerBundle**][14] (in dev env) - Adds commands for running applications
-    using the PHP built-in web server
-
-  * **DebugBundle** (in dev/test env) - Adds Debug and VarDumper component
-    integration
-
-All libraries and bundles included in the Symfony Standard Edition are
-released under the MIT or BSD license.
-
-Enjoy!
-
-[1]:  https://symfony.com/doc/3.4/setup.html
-[6]:  https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html
-[7]:  https://symfony.com/doc/3.4/doctrine.html
-[8]:  https://symfony.com/doc/3.4/templating.html
-[9]:  https://symfony.com/doc/3.4/security.html
-[10]: https://symfony.com/doc/3.4/email.html
-[11]: https://symfony.com/doc/3.4/logging.html
-[13]: https://symfony.com/doc/current/bundles/SensioGeneratorBundle/index.html
-[14]: https://symfony.com/doc/current/setup/built_in_web_server.html
-[15]: https://symfony.com/doc/current/setup.html
+    Подготовить OpenAPI-спецификацию.
+    Покрыть реализацию тестами.
+    Ограничить время жизни платёжной сессии 30 минутами.
+    Опубликовать решение как Docker-образ.
+    Добавить API-метод, который возвращает список всех платежей за переданный период.
+    После успешной оплаты асинхронно отправлять HTTP-уведомление на URL магазина. URL для таких уведомений передаваётся магазином в запросе /register.
