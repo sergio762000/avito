@@ -4,19 +4,22 @@
 namespace AppBundle\Domain;
 
 
-use AppBundle\Infrastructure\FileStore;
+use AppBundle\Infrastructure\FileStorePayment;
+use AppBundle\Infrastructure\FileStoreSession;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\VarDumper\VarDumper;
+use Symfony\Component\HttpFoundation\Request;
 
 class Payment
 {
     const QUANTITY_DIGIT_IN_CARDNUMBER = 16;
 
     private $store;
+    private $storePayments;
 
     public function __construct()
     {
-        $this->store = new FileStore();
+        $this->store = new FileStoreSession();
+        $this->storePayments = new FileStorePayment();
     }
 
     public function checkSessionId($sessionId)
@@ -36,61 +39,62 @@ class Payment
     {
         $errorMessage = array();
 
-        //todo - проверка строки "Назначение платежа"
         $purposePayment = $data->get('purposePayment');
         $isValidPurposePayment = $this->checkPurposePayment($purposePayment);
         if (!$isValidPurposePayment) {
             $errorMessage['purposePayment']['empty'] = 'Не указано назначение платежа';
         }
 
-        //todo - проверка "Суммы платежа"
         $paymentAmount = $data->get('paymentAmount');
         $isValidPaymentAmount = $this->checkPaymentAmount($paymentAmount);
         if (!$isValidPaymentAmount) {
             $errorMessage['paymentAmount']['empty'] = 'Не указана сумма платежа';
         }
 
-        //todo - проверка "Номера карточки"
-        $cardNumber = $data->get('cardHolder');
-        $isValidCardNumber = false;
+        $cardNumber = $data->get('cardNumber1');
+        $cardNumber .= $data->get('cardNumber2');
+        $cardNumber .= $data->get('cardNumber3');
+        $cardNumber .= $data->get('cardNumber4');
+        $isValidCardNumber = $this->checkCardNumber($cardNumber);
 
         if (empty($cardNumber)) {
             $errorMessage['cardNumber']['empty'] = 'Не указан номер банковской карточки';
         }
-        if (!$this->checkCardNumber($cardNumber)) {
+        if (!$isValidCardNumber) {
             $errorMessage['cardNumber']['number'] = 'Номер карты не проходит проверку';
         }
 
-        //todo - проверка "Срока действия карты"
         $isValidCardDate = $this->checkExpireDate($data);
-
         if (!$isValidCardDate) {
             $errorMessage['ExpireDate']['message'] = 'Срок годности карты не проходит проверку';
         }
 
-        //todo - проверка строки "Владелец карты"
-        $isValidCardHolder = false;
         $cardHolder = $data->get('cardHolder');
-
         if (empty($cardHolder)) {
             $errorMessage['cardHolder']['empty'] = 'Не указан владелец карты';
         }
 
-        //todo - проверка строки "CVV"
-        $isValidCVV = false;
         $CVV = $data->get('CVV');
-
-        if (empty($CVV)) {
-            $errorMessage['CVV']['empty'] = 'Не указан CVV-код';
+        if (empty($CVV) || strlen((int)$CVV) < 3 || strlen((int)$CVV) > 4 || (int)$CVV == 0) {
+            $errorMessage['CVV']['isValid'] = 'Некорректный CVV-код';
         }
 
-        //todo - проверка всех присланных параметров
-        $errorMessage = ($isValidPurposePayment && $isValidPaymentAmount && $isValidCardNumber);
-
-        //todo - проверка всех присланных параметров
-
-        VarDumper::dump($errorMessage); die('&&&&&&&&&&&');
         return $errorMessage;
+    }
+
+    public function savePayment(Request $request)
+    {
+        $data = $request->request;
+
+        $parameters = array();
+        $parameters['timePayment'] = time();
+        $parameters['sessionId'] = $data->get('sessionId');
+        $parameters['paymentAmount'] = $data->get('paymentAmount') * 100;
+        $parameters['purposePayment'] = $data->get('purposePayment');
+        $parameters['cardNumber'] = $data->get('cardNumber1') . $data->get('cardNumber2') . $data->get('cardNumber3') . $data->get('cardNumber4');
+        $parameters['cardHolder'] = $data->get('cardHolder');
+
+        return $this->storePayments->save($parameters);
     }
 
     private function checkTimeValid($foundString)
@@ -110,6 +114,7 @@ class Payment
         $result = false;
 
         $numberWOHyphen = strrev(preg_replace('/[^\d]+/', '', $cardNumber));
+
         if (strlen($numberWOHyphen) == self::QUANTITY_DIGIT_IN_CARDNUMBER ) {
             $summaryAllDigit = 0;
             for ($i = 0, $j = strlen($numberWOHyphen); $i < $j; $i++) {
@@ -125,7 +130,6 @@ class Payment
             }
             $result = ($summaryAllDigit % 10) === 0;
         }
-
         return $result;
     }
 
@@ -135,15 +139,10 @@ class Payment
         $monthExpire = $data->get('monthExpire');
         $yearExpire = $data->get('yearExpire');
 
-        VarDumper::dump((int) $monthExpire);
-        die(__METHOD__);
-
-        //todo - проверка месяца на длину строки и правильность 01-12
         if (strlen($monthExpire) < 2 || (int) $monthExpire < 1 || (int) $monthExpire > 12) {
             $isValidCardDate = false;
         }
 
-        //todo - проверка года на длину строки и правильность 20-99
         $currentYear = date('y', time());
         if (strlen($yearExpire) < 2 || (int) $yearExpire < $currentYear) {
             $isValidCardDate = false;
@@ -154,13 +153,11 @@ class Payment
 
     private function checkPurposePayment($purposePayment)
     {
-        //todo - Проверка назначения платежа
         return empty($purposePayment) ? false : true;
     }
 
     private function checkPaymentAmount($paymentAmount)
     {
-        //todo - Проверка суммы платежа
         return empty($paymentAmount) ? false : true;
     }
 

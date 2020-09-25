@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\VarDumper\VarDumper;
 
 class PaymentController extends Controller
 {
@@ -35,7 +34,10 @@ class PaymentController extends Controller
         $isValidSessionId = $this->payment->checkSessionId($parameters['sessionId']);
 
         if (!$isValidSessionId) {
-            return $this->render('payment/non_valid_sessionId.html.twig');
+            return new Response(
+                json_encode(array('message' => 'Время жизни платежной сессии истекло'), JSON_UNESCAPED_UNICODE),
+                Response::HTTP_OK
+            );
         }
 
         return $this->render(
@@ -57,34 +59,37 @@ class PaymentController extends Controller
         $isValidSessionId = $this->payment->checkSessionId($data->get('sessionId'));
 
         if (!$isValidSessionId) {
-            return $this->render('payment/non_valid_sessionId.html.twig');
+            return new Response(
+                json_encode(array('message' => 'Время жизни платежной сессии истекло'), JSON_UNESCAPED_UNICODE),
+                Response::HTTP_OK
+            );
         }
 
         $result = $this->payment->checkDataForPayment($data);
-
         if (!empty($result)) {
-            foreach ($result as $item) {
-                var_dump($item);
-            }
+            return new Response(
+                json_encode($result, JSON_UNESCAPED_UNICODE),
+                Response::HTTP_CONFLICT //todo - Подобрать правильный код ответа
+            );
         }
-        die('********');
-//        VarDumper::dump($data); die('********');
+
+        $storePaymentMessage = $this->payment->savePayment($request);
+
         return new Response(
-            __METHOD__,
+            json_encode($storePaymentMessage, JSON_UNESCAPED_UNICODE),
             Response::HTTP_OK
         );
     }
 
     private function getListParameters($requestString)
     {
-        //todo - разбор строки параметров
         $parametersHash = explode('&', $requestString);
 
         $parameters = array();
         foreach ($parametersHash as $value) {
-            $arr = array();
-            $arr = explode('=', $value);
-            $parameters[$arr[0]] = $arr[1];
+            $arrKeyValue = array();
+            $arrKeyValue = explode('=', $value);
+            $parameters[$arrKeyValue[0]] = $arrKeyValue[1];
         }
 
         return $parameters;

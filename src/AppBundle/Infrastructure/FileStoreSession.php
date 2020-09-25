@@ -6,17 +6,16 @@ namespace AppBundle\Infrastructure;
 
 use AppBundle\Domain\StoreSession;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
-use Symfony\Component\VarDumper\VarDumper;
 
-class FileStore implements StoreSession
+class FileStoreSession implements StoreSession
 {
     const PATH_TO_STORE_FILE = '../var/storeForSessionId.txt';
 
     public function find()
     {
+        // TODO: Implement find() method.
         $listSessionId = array();
 
-        // TODO: Implement find() method.
         return $listSessionId;
     }
 
@@ -43,8 +42,6 @@ class FileStore implements StoreSession
     public function save(array $dataForSave)
     {
         try {
-            // TODO: Implement save() method.
-
             $result = false;
 
             if (!is_readable(self::PATH_TO_STORE_FILE)) {

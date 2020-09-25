@@ -30,7 +30,13 @@
                                <span>Card number:</span>
                                <strong><abbr title="Обязательное">*</abbr></strong>
                            </label>
-                           <input type="text" id="cardNumber" name="cardNumber">
+                           <input class="cardnumber" type="text" id="cardNumber1" name="cardNumber1" minlength="4" maxlength="4">
+                           <span>-</span>
+                           <input class="cardnumber" type="text" id="cardNumber2" name="cardNumber2" minlength="4" maxlength="4">
+                           <span>-</span>
+                           <input class="cardnumber" type="text" id="cardNumber3" name="cardNumber3" minlength="4" maxlength="4">
+                           <span>-</span>
+                           <input class="cardnumber" type="text" id="cardNumber4" name="cardNumber4" minlength="4" maxlength="4">
                        </li>
                        <li>
                            <label for="validThru">
@@ -51,10 +57,10 @@
                        </li>
                        <li>
                            <label for="CVV">
-                               <span>CVV</span>
+                               <span>CVV/CVC</span>
                                <strong><abbr title="Обязательное">*</abbr></strong>
                            </label>
-                           <input type="text" id="cvv" name="CVV" minlength="3" maxlength="4">
+                           <input class="cvv" type="text" id="cvv" name="CVV" minlength="3" maxlength="4">
                        </li>
                        <li>
                            <input type="hidden" id="sessionId" name="sessionId" value="{{ sessionId }}">
@@ -96,8 +102,10 @@
         form ul { list-style: none; padding: 0; margin: 0; }
         form li + li { margin-top: 1em; }
         /*label { display: inline-block; width: 90px; text-align: right; }*/
-        input.expire { font: 1em sans-serif; width: 3ch; box-sizing: border-box; border: 1px solid #999; }
         input { font: 1em sans-serif; width: 300px; box-sizing: border-box; border: 1px solid #999; }
+        input.expire { font: 1em sans-serif; width: 3ch; box-sizing: border-box; border: 1px solid #999; }
+        input.cardnumber { font: 1em sans-serif; width: 5ch; box-sizing: border-box; border: 1px solid #999; }
+        input.cvv { font: 1em sans-serif; width: 5ch; box-sizing: border-box; border: 1px solid #999; }
         input:focus { border-color: #000; }
         .button { padding-left: 90px; }
         button { margin-left: .5em; }

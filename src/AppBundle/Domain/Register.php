@@ -4,7 +4,7 @@
 namespace AppBundle\Domain;
 
 
-use AppBundle\Infrastructure\FileStore;
+use AppBundle\Infrastructure\FileStoreSession;
 
 class Register
 {
@@ -13,7 +13,7 @@ class Register
 
     public function __construct()
     {
-        $this->store = new FileStore();
+        $this->store = new FileStoreSession();
     }
 
     public function createSessionUID()

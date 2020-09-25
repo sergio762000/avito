@@ -42,7 +42,7 @@ class RegisterController extends Controller
 
         if (!$isValidSave) {
             return new Response(
-                json_encode(array("message" => "Ошибка регистрации сессии")),
+                json_encode(array("message" => "Ошибка регистрации сессии"), JSON_UNESCAPED_UNICODE),
                 Response::HTTP_CONFLICT //todo - Подобрать правильный код ответа
             );
         }
