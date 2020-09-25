@@ -54,8 +54,8 @@
         }
     returnData:
         {
-            "cardNumber" : string,
-            "paymentIsValid" : true/false
+            'isSuccessStore' => boolean,
+            'message' => string
         }
 
 
