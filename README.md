@@ -1,3 +1,9 @@
+1) git clone https://github.com/sergio762000/avito.git {your_directory}
+2) cd {your_directory}
+3) composer install
+4) database & mailer - default settings
+
+
 Тестовое задание для backend-стажёра в юнит Billing
 
 Давай напишем собственную платёжную систему, которая будет уметь отображать форму оплаты банковской картой и сохранять информацию о выполненных платежах.
