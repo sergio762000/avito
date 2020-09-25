@@ -32,7 +32,7 @@ class RegisterController extends Controller
 
         if (!$isValidSentData) {
             return new Response(
-                json_encode(array("message" => "Присланные данные некорректны!!!")),
+                json_encode(array("message" => "Присланные данные некорректны!!!"), JSON_UNESCAPED_UNICODE),
                 Response::HTTP_CONFLICT //todo - Подобрать правильный код ответа
             );
         }
