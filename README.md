@@ -20,10 +20,10 @@
     methods: POST
     inputData:
         {
-            "summa" : int,
-            "назначение платежа" : string
-            "уведомление" : string
-        }
+          "paymentAmount" : int,
+          "purposePayment" : string
+          "notificationUrl" : string
+         }
     returnData:
         {
             "url" : string
