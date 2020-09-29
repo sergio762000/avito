@@ -2,6 +2,7 @@
 2) cd {your_directory}
 3) composer install
 4) database & mailer - default settings
+5) http-server start on port 8888
 
 
 Тестовое задание для backend-стажёра в юнит Billing
